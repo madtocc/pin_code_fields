@@ -112,6 +112,9 @@ class PinCodeTextField extends StatefulWidget {
   /// Default is 16.
   final double errorTextSpace;
 
+  // horizontal padding between cells
+  final double paddingBetweenCell;
+
   PinCodeTextField({
     Key key,
     @required this.appContext,
@@ -152,6 +155,7 @@ class PinCodeTextField extends StatefulWidget {
     this.onSaved,
     this.autoValidate = false,
     this.errorTextSpace = 16,
+    this.paddingBetweenCell = 0,
   }) : super(key: key);
 
   @override
@@ -260,6 +264,7 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
     assert(widget.textInputAction != null);
     assert(widget.autoDisposeControllers != null);
     assert(widget.autoValidate != null);
+    assert(widget.paddingBetweenCell != null);
   }
 
   // Assigning the text controller, if empty assiging a new one.
@@ -499,7 +504,7 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
                     : null,
                 child: Row(
                   mainAxisAlignment: widget.mainAxisAlignment,
-                  children: _generateFields(),
+                  children: _generateFields(widget.paddingBetweenCell),
                 ),
               ),
             ),
@@ -509,69 +514,72 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
     );
   }
 
-  List<Widget> _generateFields() {
+  List<Widget> _generateFields(double cellPadding) {
     var result = <Widget>[];
     for (int i = 0; i < widget.length; i++) {
       result.add(
-        AnimatedContainer(
-          curve: widget.animationCurve,
-          duration: widget.animationDuration,
-          width: _pinTheme.fieldWidth,
-          height: _pinTheme.fieldHeight,
-          decoration: BoxDecoration(
-            color: widget.enableActiveFill
-                ? _getFillColorFromIndex(i)
-                : Colors.transparent,
-            shape: _pinTheme.shape == PinCodeFieldShape.circle
-                ? BoxShape.circle
-                : BoxShape.rectangle,
-            borderRadius: borderRadius,
-            border: _pinTheme.shape == PinCodeFieldShape.underline
-                ? Border(
-                    bottom: BorderSide(
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: cellPadding),
+          child: AnimatedContainer(
+            curve: widget.animationCurve,
+            duration: widget.animationDuration,
+            width: _pinTheme.fieldWidth,
+            height: _pinTheme.fieldHeight,
+            decoration: BoxDecoration(
+              color: widget.enableActiveFill
+                  ? _getFillColorFromIndex(i)
+                  : Colors.transparent,
+              shape: _pinTheme.shape == PinCodeFieldShape.circle
+                  ? BoxShape.circle
+                  : BoxShape.rectangle,
+              borderRadius: borderRadius,
+              border: _pinTheme.shape == PinCodeFieldShape.underline
+                  ? Border(
+                      bottom: BorderSide(
+                        color: _getColorFromIndex(i),
+                        width: _pinTheme.borderWidth,
+                      ),
+                    )
+                  : Border.all(
                       color: _getColorFromIndex(i),
                       width: _pinTheme.borderWidth,
                     ),
-                  )
-                : Border.all(
-                    color: _getColorFromIndex(i),
-                    width: _pinTheme.borderWidth,
-                  ),
-          ),
-          child: Center(
-            child: AnimatedSwitcher(
-              switchInCurve: widget.animationCurve,
-              switchOutCurve: widget.animationCurve,
-              duration: widget.animationDuration,
-              transitionBuilder: (child, animation) {
-                if (widget.animationType == AnimationType.scale) {
-                  return ScaleTransition(
-                    scale: animation,
-                    child: child,
-                  );
-                } else if (widget.animationType == AnimationType.fade) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  );
-                } else if (widget.animationType == AnimationType.none) {
-                  return child;
-                } else {
-                  return SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, .5),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  );
-                }
-              },
-              child: Text(
-                widget.obscureText && _inputList[i].isNotEmpty
-                    ? "●"
-                    : _inputList[i],
-                key: ValueKey(_inputList[i]),
-                style: widget.textStyle,
+            ),
+            child: Center(
+              child: AnimatedSwitcher(
+                switchInCurve: widget.animationCurve,
+                switchOutCurve: widget.animationCurve,
+                duration: widget.animationDuration,
+                transitionBuilder: (child, animation) {
+                  if (widget.animationType == AnimationType.scale) {
+                    return ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    );
+                  } else if (widget.animationType == AnimationType.fade) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    );
+                  } else if (widget.animationType == AnimationType.none) {
+                    return child;
+                  } else {
+                    return SlideTransition(
+                      position: Tween<Offset>(
+                        begin: const Offset(0, .5),
+                        end: Offset.zero,
+                      ).animate(animation),
+                      child: child,
+                    );
+                  }
+                },
+                child: Text(
+                  widget.obscureText && _inputList[i].isNotEmpty
+                      ? "●"
+                      : _inputList[i],
+                  key: ValueKey(_inputList[i]),
+                  style: widget.textStyle,
+                ),
               ),
             ),
           ),
